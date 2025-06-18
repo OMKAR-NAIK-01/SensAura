@@ -10,9 +10,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="52fcfea5-5ddd-4e32-a5cc-a5884510b619" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/BlindMode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/BlindMode.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/EmergencyContactsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/EmergencyContactsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/FaceRecognitionManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/FallDetection.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/assistantapp/FallDetection.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blind-nav-web/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/blind-nav-web/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blind-nav-web/src/ObjectDetection.js" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

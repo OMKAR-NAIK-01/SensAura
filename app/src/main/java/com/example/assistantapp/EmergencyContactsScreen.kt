@@ -126,4 +126,4 @@ fun EmergencyContactsScreen(
             }
         )
     }
-} 
+}

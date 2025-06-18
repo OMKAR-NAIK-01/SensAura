@@ -100,8 +100,5 @@ dependencies {
 
     implementation("com.google.cloud:google-cloud-speech:2.2.1")
 
-    implementation("com.google.mlkit:face-detection:16.1.5")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
 }

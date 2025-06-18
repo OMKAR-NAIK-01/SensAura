@@ -42,9 +42,6 @@ import java.util.concurrent.Executors
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
-import com.example.assistantapp.FaceRecognitionManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun BlindModeScreen() {
@@ -84,7 +81,6 @@ fun BlindModeScreen() {
     var isReadingMode by remember { mutableStateOf(false) }
     var readingModeResult by remember { mutableStateOf("") }
     var showEmergencyContacts by remember { mutableStateOf(false) }
-    var faceDebugText by remember { mutableStateOf("") }
     
     // Initialize fall detection
     val fallDetection = remember { FallDetection(context) }
@@ -195,39 +191,6 @@ fun BlindModeScreen() {
         }
     }
 
-    val faceRecognitionManager = remember { FaceRecognitionManager(context) }
-    var detectedFaceBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var showSaveFaceDialog by remember { mutableStateOf(false) }
-    var newFaceName by remember { mutableStateOf("") }
-    var lastRecognizedName by remember { mutableStateOf("") }
-
-    // Helper: Save face with dialog
-    if (showSaveFaceDialog && detectedFaceBitmap != null) {
-        AlertDialog(
-            onDismissRequest = { showSaveFaceDialog = false },
-            title = { Text("Save Face") },
-            text = {
-                OutlinedTextField(
-                    value = newFaceName,
-                    onValueChange = { newFaceName = it },
-                    label = { Text("Enter name for this face") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    faceRecognitionManager.saveFace(newFaceName, detectedFaceBitmap!!)
-                    tts.value?.speak("Saved $newFaceName's face", TextToSpeech.QUEUE_FLUSH, null, null)
-                    showSaveFaceDialog = false
-                    newFaceName = ""
-                }) { Text("Save") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSaveFaceDialog = false }) { Text("Cancel") }
-            }
-        )
-    }
-
     if (hasPermission) {
         if (sessionStarted) {
             if (isReadingMode) {
@@ -254,28 +217,6 @@ fun BlindModeScreen() {
                         coroutineScope.launch {
                             val bitmap = imageProxy.toBitmap()
                             if (bitmap != null) {
-                                // --- FACE DETECTION & RECOGNITION ---
-                                val faces = withContext(Dispatchers.Default) {
-                                    faceRecognitionManager.detectFaces(bitmap)
-                                }
-                                if (faces.isNotEmpty()) {
-                                    val face = faces[0]
-                                    val cropped = faceRecognitionManager.cropFace(bitmap, face.boundingBox)
-                                    detectedFaceBitmap = cropped
-                                    faceDebugText = "Face detected"
-                                    // Try to recognize
-                                    val recognizedName = faceRecognitionManager.matchFace(cropped)
-                                    if (recognizedName != null && recognizedName != lastRecognizedName) {
-                                        tts.value?.speak("Your $recognizedName is in front of you", TextToSpeech.QUEUE_FLUSH, null, null)
-                                        lastRecognizedName = recognizedName
-                                        faceDebugText = "Recognized: $recognizedName"
-                                    }
-                                } else {
-                                    detectedFaceBitmap = null
-                                    lastRecognizedName = ""
-                                    faceDebugText = ""
-                                }
-                                // --- END FACE DETECTION ---
                                 sendFrameToGeminiAI(bitmap, { partialResult ->
                                     analysisResult += " $partialResult"
                                     val newText = analysisResult.substring(lastSpokenIndex)
@@ -355,10 +296,9 @@ fun BlindModeScreen() {
                         }
                     },
                     onTap = {
-                        // Voice command: If face detected, prompt to save
-                        if (detectedFaceBitmap != null) {
-                            tts.value?.speak("Say save face to save this face", TextToSpeech.QUEUE_FLUSH, null, null)
-                        }
+                        // Triple tap to show emergency contacts
+                        showEmergencyContacts = true
+                        tts.value?.speak("Opening emergency contacts", TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 )
             }
@@ -402,53 +342,7 @@ fun BlindModeScreen() {
                         .size(64.dp),
                     tint = if (isMicActive) Color.Green else Color(0xFFB0B1B1)
                 )
-                // Button to save detected face
-                if (detectedFaceBitmap != null) {
-                    Button(
-                        onClick = { showSaveFaceDialog = true },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp)
-                    ) {
-                        Text("Save Face")
-                    }
-                }
-                if (faceDebugText.isNotEmpty()) {
-                    Text(
-                        text = faceDebugText,
-                        color = Color.Yellow,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 32.dp)
-                    )
-                }
             }
-        }
-    }
-
-    // Voice command: Listen for "save face"
-    LaunchedEffect(detectedFaceBitmap) {
-        if (detectedFaceBitmap != null && isMicActive) {
-            // Listen for "save face" command
-            speechRecognizer.setRecognitionListener(object : RecognitionListener {
-                override fun onResults(results: Bundle?) {
-                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    if (!matches.isNullOrEmpty()) {
-                        val spokenText = matches[0].lowercase()
-                        if (spokenText.contains("save face")) {
-                            showSaveFaceDialog = true
-                        }
-                    }
-                }
-                override fun onReadyForSpeech(params: Bundle?) {}
-                override fun onBeginningOfSpeech() {}
-                override fun onRmsChanged(rmsdB: Float) {}
-                override fun onBufferReceived(buffer: ByteArray?) {}
-                override fun onEndOfSpeech() {}
-                override fun onError(error: Int) {}
-                override fun onPartialResults(partialResults: Bundle?) {}
-                override fun onEvent(eventType: Int, params: Bundle?) {}
-            })
         }
     }
 }
